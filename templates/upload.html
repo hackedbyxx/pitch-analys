@@ -468,20 +468,21 @@
 
     function onAudioUpdata() {
         x = parseInt(audioView.currentTime * 100 + '');
-        audioView.play();
+        //audioView.play();
         //audioView.duration;//获取总播放时间
         //audioView.currentTime;//获取播放进度
         //console.log(audio.currentTime);//控制台显示
-        {#clearInterval(interval)#}
-        {#interval = null;#}
-        {#x = parseInt(audio.currentTime * 100 + '');#}
-        {#interval = setAnimationInterval();#}
+        {#clearInterval(interval)
+        interval = null;
+        x = parseInt(audio.currentTime * 100 + '');
+        interval = setAnimationInterval();#}
     }
 
     function startPlay(play) {
         clearInterval(interval);
         interval = null;
         interval = setAnimationInterval();
+        //onplay事件无需再次播放
         if(play!=0){
             audioView.play();
         }
@@ -491,6 +492,7 @@
     function stopPlay(play) {
         clearInterval(interval);
         interval = null;
+        //onplay事件无需再次播放
         if(play!=0){
             audioView.pause();
         }
