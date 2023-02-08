@@ -183,7 +183,7 @@
     <div class="center">
         <button class="button blue" onClick="update_plot()">生成频率图</button>
         <button class="button orange" onClick="startPlay()">播放</button>
-        <button class="button red" onClick="stopPlay()">停止</button>
+        <button class="button red" onClick="stopPlay()">暂停</button>
     </div>
 </div>
 <script type="text/javascript">
@@ -467,15 +467,15 @@
     }
 
     function onAudioUpdata() {
+        x = parseInt(audioView.currentTime * 100 + '');
         audioView.play();
-        audioView.duration;//获取总播放时间
-        audioView.currentTime;//获取播放进度
+        //audioView.duration;//获取总播放时间
+        //audioView.currentTime;//获取播放进度
         //console.log(audio.currentTime);//控制台显示
-        audioView.play();
-        clearInterval(interval)
-        interval = null;
-        x = parseInt(audio.currentTime * 100 + '');
-        interval = setAnimationInterval();
+        {#clearInterval(interval)#}
+        {#interval = null;#}
+        {#x = parseInt(audio.currentTime * 100 + '');#}
+        {#interval = setAnimationInterval();#}
     }
 
     function startPlay(play) {
