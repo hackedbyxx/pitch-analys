@@ -22,7 +22,8 @@ def pitch_track(smooth=False):
 
     try:
         # Save the file that was sent, and read it into a parselmouth.Sound
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        # windows要设置delete为False,否则无法正确生成临时文件
+        with tempfile.NamedTemporaryFile(delete=True) as tmp:
             tmp.write(request.files['audio'].read())
             tmp_name = convert_audio_for_model(tmp.name)
             sound = parselmouth.Sound(tmp_name)
