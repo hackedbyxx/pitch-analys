@@ -168,7 +168,7 @@
 <div id="loading" style="display: none" class="loading style-2">
     <div class="loading-wheel"></div>
 </div>
-<div id="plot" style="width:100%;height:600px;margin-top:0px"></div>
+<div id="plot" style="width:100%;height:35rem;margin-top:0px"></div>
 <div style="text-align: center;padding: 20px 0;">
     <input class="button" style="width:40rem;height:3rem; border: #3F83F1 solid 1px;" class="" type="file"
            accept="audio/*" name="audio" id="audio"/>
@@ -184,27 +184,9 @@
         <button class="button blue" onClick="update_plot()">生成频率图</button>
         <button class="button orange" onClick="startPlay()">播放</button>
         <button class="button red" onClick="stopPlay()">停止</button>
-        <!--<div class="button" onclick="update_plot()">
-          <p>生成频率图</p>
-        </div>
-        <div class="button" onclick="startPlay()">
-          <p>播放</p>
-        </div>
-        <div class="button" onclick="stopPlay()">
-          <p>停止</p>
-        </div>-->
     </div>
 </div>
 <script type="text/javascript">
-    // var $button = document.querySelector('.button');
-    // $button.addEventListener('click', function() {
-    //   var duration = 0.3,
-    //       delay = 0.08;
-    //   TweenMax.to($button, duration, {scaleY: 1.6, ease: Expo.easeOut});
-    //   TweenMax.to($button, duration, {scaleX: 1.2, scaleY: 1, ease: Back.easeOut, easeParams: [3], delay: delay});
-    //   TweenMax.to($button, duration * 1.25, {scaleX: 1, scaleY: 1, ease: Back.easeOut, easeParams: [6], delay: delay * 3 });
-    // });
-
     var selectorOptions = {
         buttons: [{
             step: 'all',
@@ -495,6 +477,8 @@
     }
 
     function startPlay(play) {
+        clearInterval(interval);
+        interval = null;
         interval = setAnimationInterval();
         if(play!=0){
             audioView.play();
@@ -509,33 +493,5 @@
             audioView.pause();
         }
     }
-
-    // var graph = document.getElementById('plot')
-
-    // function stopAnimation () {
-    //   Plotly.animate(graph, frames, {
-    //       fromcurrent: true,
-    //       transition: {
-    //         duration: 0,
-    //       },
-    //       frame: {
-    //         duration: 0,
-    //         redraw: false
-    //       }
-    //   });
-    // }
-    //
-    // function startAnimation (mode) {
-    //   Plotly.animate(graph, frames, {
-    //       fromcurrent: true,
-    //       transition: {
-    //         duration: 0,
-    //       },
-    //       frame: {
-    //         duration: 100,
-    //         redraw: false
-    //       }
-    //   });
-    // }
 </script>
 </body>
