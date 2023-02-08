@@ -1,0 +1,541 @@
+<head>
+    <title>音高分析</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <style>
+        /*body {
+            background: #f1c40f;
+        }*/
+        
+        .container {
+            width: 100%;
+            /*position: relative;*/
+            /*height: 20rem;*/
+
+            display: flex;
+            justify-content: center;
+        }
+        .center {
+            /*width: 100rem;*/
+            height: 5rem;
+            /*position: absolute;*/
+            /*float: left;*/
+            /*left: 50%;*/
+            /*!*top: 50%;*!*/
+            /*transform: translateX(-50%);*/
+            border-radius: 3px;
+        }
+
+        button {
+            color: #444444;
+            background: #F3F3F3;
+            border: 1px #DADADA solid;
+            padding: 5px 10px;
+            border-radius: 2px;
+            font-weight: bold;
+            font-size: 9pt;
+            outline: none;
+        }
+
+        button:hover {
+            border: 1px #C6C6C6 solid;
+            box-shadow: 1px 1px 1px #EAEAEA;
+            color: #333333;
+            background: #F7F7F7;
+        }
+
+        button:active {
+            box-shadow: inset 1px 1px 1px #DFDFDF;
+        }
+
+        /* Blue button as seen on translate.google.com*/
+        button.blue {
+            color: white;
+            background: #4C8FFB;
+            border: 1px #3079ED solid;
+            box-shadow: inset 0 1px 0 #80B0FB;
+        }
+
+        button.blue:hover {
+            border: 1px #2F5BB7 solid;
+            box-shadow: 0 1px 1px #EAEAEA, inset 0 1px 0 #5A94F1;
+            background: #3F83F1;
+        }
+
+        button.blue:active {
+            box-shadow: inset 0 2px 5px #2370FE;
+        }
+
+        /* Orange button as seen on blogger.com*/
+        button.orange {
+            color: white;
+            border: 1px solid #FB8F3D;
+            background: -webkit-linear-gradient(top, #FDA251, #FB8F3D);
+            background: -moz-linear-gradient(top, #FDA251, #FB8F3D);
+            background: -ms-linear-gradient(top, #FDA251, #FB8F3D);
+        }
+
+        button.orange:hover {
+            border: 1px solid #EB5200;
+            background: -webkit-linear-gradient(top, #FD924C, #F9760B);
+            background: -moz-linear-gradient(top, #FD924C, #F9760B);
+            background: -ms-linear-gradient(top, #FD924C, #F9760B);
+            box-shadow: 0 1px #EFEFEF;
+        }
+
+        button.orange:active {
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Red Google Button as seen on drive.google.com */
+        button.red {
+            background: -webkit-linear-gradient(top, #DD4B39, #D14836);
+            background: -moz-linear-gradient(top, #DD4B39, #D14836);
+            background: -ms-linear-gradient(top, #DD4B39, #D14836);
+            border: 1px solid #DD4B39;
+            color: white;
+            text-shadow: 0 1px 0 #C04131;
+        }
+
+        button.red:hover {
+            background: -webkit-linear-gradient(top, #DD4B39, #C53727);
+            background: -moz-linear-gradient(top, #DD4B39, #C53727);
+            background: -ms-linear-gradient(top, #DD4B39, #C53727);
+            border: 1px solid #AF301F;
+        }
+
+        button.red:active {
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.2);
+            background: -webkit-linear-gradient(top, #D74736, #AD2719);
+            background: -moz-linear-gradient(top, #D74736, #AD2719);
+            background: -ms-linear-gradient(top, #D74736, #AD2719);
+        }
+
+        .button {
+            background: #3498db;
+            width: 10rem;
+            height: 5rem;
+            padding: 0 5px;
+            font-size: 18pt;
+        }
+
+        .loading {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, .5);
+            z-index: 999;
+        }
+
+        .loading-wheel {
+            width: 20px;
+            height: 20px;
+            margin-top: -40px;
+            margin-left: -40px;
+
+            position: absolute;
+            top: 50%;
+            left: 50%;
+
+            border-width: 30px;
+            border-radius: 50%;
+            -webkit-animation: spin 1s linear infinite;
+        }
+
+        .style-2 .loading-wheel {
+            border-style: double;
+            border-color: #ccc transparent;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0);
+            }
+            100% {
+                -webkit-transform: rotate(-360deg);
+            }
+        }
+    </style>
+    <!--<script type="text/javascript" src="./static/js/jquery.3.6.3.min.js"></script>
+    <script type="text/javascript" src="./static/js/plotly.2.18.0.min.js"></script>-->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/plotly.js@2.18.0/dist/plotly.min.js"></script>
+</head>
+<body>
+<div id="loading" style="display: none" class="loading style-2">
+    <div class="loading-wheel"></div>
+</div>
+<div id="plot" style="width:100%;height:600px;margin-top:0px"></div>
+<div style="text-align: center;padding: 20px 0;">
+    <input class="button" style="width:40rem;height:3rem; border: #3F83F1 solid 1px;" class="" type="file"
+           accept="audio/*" name="audio" id="audio"/>
+</div>
+<div class="container">
+    <div class="center">
+        <audio id="audioView" style="width: 60rem" controls="controls" onSeeked="onAudioUpdata()" onPause="stopPlay(0)"
+               onPlay="startPlay(0)"></audio>
+    </div>
+</div>
+<div class="container">
+    <div class="center">
+        <button class="button blue" onClick="update_plot()">生成频率图</button>
+        <button class="button orange" onClick="startPlay()">播放</button>
+        <button class="button red" onClick="stopPlay()">停止</button>
+        <!--<div class="button" onclick="update_plot()">
+          <p>生成频率图</p>
+        </div>
+        <div class="button" onclick="startPlay()">
+          <p>播放</p>
+        </div>
+        <div class="button" onclick="stopPlay()">
+          <p>停止</p>
+        </div>-->
+    </div>
+</div>
+<script type="text/javascript">
+    // var $button = document.querySelector('.button');
+    // $button.addEventListener('click', function() {
+    //   var duration = 0.3,
+    //       delay = 0.08;
+    //   TweenMax.to($button, duration, {scaleY: 1.6, ease: Expo.easeOut});
+    //   TweenMax.to($button, duration, {scaleX: 1.2, scaleY: 1, ease: Back.easeOut, easeParams: [3], delay: delay});
+    //   TweenMax.to($button, duration * 1.25, {scaleX: 1, scaleY: 1, ease: Back.easeOut, easeParams: [6], delay: delay * 3 });
+    // });
+
+    var selectorOptions = {
+        buttons: [{
+            step: 'all',
+        }],
+    };
+    var datas;
+    var frames = [];
+    var graph = document.getElementById('plot');
+    var loading = document.getElementById('loading');
+    var xrange = 20;
+    var xaxis = {
+        title: '时间（s)',
+        // fixedrange: true,		//禁止x坐标缩放
+        titlefont: {
+            family: 'Arial, sans-serif',
+            size: 18,
+            color: 'grey'
+        },
+        showticklabels: true,
+        dtick: 10,
+        tickangle: 'auto',
+        tickfont: {
+            family: 'Old Standard TT, serif',
+            size: 14,
+            color: 'black'
+        },
+        exponentformat: 'none',
+        showexponent: 'all',
+        rangeselector: selectorOptions,
+        rangeslider: {},
+        range: [0, xrange]
+    };
+    var update_plot = function () {
+        var audio = document.getElementById("audio").files[0];
+        var formData = new FormData();
+        formData.append("audio", audio);
+
+        var config = {
+            toImageButtonOptions: {
+                format: 'svg', // one of png, svg, jpeg, webp
+                filename: audio.name + ' 音高图',
+                height: 600,
+                width: 1600,
+                scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
+            },
+            responsive: true, //移动端适配
+        };
+        loading.style.display = '';
+        $.getJSON({
+            url: "/pitch_track?smooth=0", method: "POST",
+            data: formData, processData: false, contentType: false,
+            success: function (data) {
+                // console.log([...Array(data.length).keys()])
+                // console.log(data.map(function (x) {
+                //         return x == 0.0 ? undefined : x;
+                //     }))
+                // for(let i in data){
+                //     data[i]
+                // }
+                loading.style.display = 'none';
+                var blob = new Blob([audio]);//bufs为二进制
+                // 设置路径使用jQuery或者直接生成dom都不生效
+                if (window.URL) {
+                    audioView.src = window.URL.createObjectURL(blob);
+                } else {
+                    audioView.src = blob;
+                }
+
+                datas = data;
+                var pitches = data.pitches.map(function (x) {
+                    return x == 0.0 ? undefined : x;
+                });
+                var n = data.times.length;
+                var index = 0;
+                for (var i = 0; i < n; i += 10) {
+                    frames[index] = {data: [{x: [], y: []}]}
+                    frames[index].data[0].x = data.times.slice(0, i + 1);
+                    frames[index].data[0].y = pitches.slice(0, i + 1);
+                    index++;
+                }
+
+                var layout = {
+                    title: audio.name + ' 音高',
+                    dragmode: false,	 //移动端滚动图表
+                    xaxis: xaxis,
+                    yaxis: {
+                        title: '频率（HZ）',
+                        // fixedrange: true,		//禁止y坐标缩放
+                        titlefont: {
+                            family: 'Arial, sans-serif',
+                            size: 18,
+                            color: 'lightgrey'
+                        },
+                        showticklabels: true,
+                        // tickangle: 45,
+                        tickfont: {
+                            family: 'Old Standard TT, serif',
+                            size: 14,
+                            color: 'black'
+                        },
+                        exponentformat: 'none',
+                        showexponent: 'all'
+                    },
+                    annotations: [{
+                        showarrow: false,
+                        text: "<b>#</b>",
+                        font: {
+                            family: 'Gravitas One',
+                            size: 30,
+                            color: 'blue'
+                        },
+                        xref: 'paper',
+                        yref: '1',
+                        x: 0.5,
+                        y: 600
+                    }],
+                    margin: {		//设置图表的边距
+                        l: 50,
+                        r: 20,
+                        t: 40,
+                        b: 20
+                    },
+                    /*updatemenus: [{
+                      x: 0.5,
+                      y: 0,
+                      yanchor: "top",
+                      xanchor: "center",
+                      showactive: false,
+                      direction: "left",
+                      type: "buttons",
+                      pad: {"t": 150, "r": 10},
+                      buttons: [{
+                        method: "animate",
+                        args: [function (){
+                            console.log('xxxxx')
+                        }, {
+                          fromcurrent: true,
+                          transition: {
+                            duration: 0,
+                          },
+                          frame: {
+                            duration: 100,
+                            redraw: false
+                          }
+                        }],
+                        label: "Play"
+                      }, {
+                        method: "animate",
+                        args: [
+                          [null],
+                          {
+                            mode: "immediate",
+                            transition: {
+                              duration: 0
+                            },
+                            frame: {
+                              duration: 0,
+                              redraw: false
+                            }
+                          }
+                        ],
+                        label: "Pause"
+                      }]
+                    }]*/
+                };
+
+                Plotly.newPlot("plot", [{
+                    x: data.times,
+                    y: pitches,
+                    text: data.notes
+                }], layout, config).then(function () {
+                    // Plotly.addFrames('plot', frames);
+                });
+
+                x = 0;
+                // clearInterval(interval);
+                interval = setAnimationInterval();
+                // let worker = new Worker('./static/js/worker.js');
+                // worker.postMessage({x:x, graph:graph})
+                // interval = setInterval(function () {
+                //     if(pitches[x]){
+                //         Plotly.relayout(graph, {
+                //             shapes:[{
+                //                 type:"line",
+                //                 line:{
+                //                     color: "red",
+                //                 },
+                //                 fillcolor: 'red',
+                //                 x0: x*0.01,
+                //                 x1: x*0.01,
+                //                 // ysizemode: 'pixel', //Default: "scaled"
+                //                 y0: 0,
+                //                 y1: 1,
+                //                 yref: 'paper'
+                //             }]
+                //         });
+                //     }
+                //
+                //     // console.log(pitches[x]-50, pitches[x]+50)
+                //     if (data.notes[x]){
+                //         Plotly.update("plot", {}, getAnnotations(data.notes[x]));
+                //     }
+                //     x += 10;
+                //
+                // }, 100);
+
+                audioView.autoplay = true;
+                // Plotly.update("plot", {}, getAnnotations('B6'));
+
+            }
+        });
+    };
+
+    function getAnnotations(text) {
+        var startX = x / 100;
+        startX = startX > xrange / 5 * 2 ? startX - xrange / 5 * 2 : 0;
+        xaxis.range = [startX, startX + xrange]
+        // console.log(xaxis.range)
+        var annotations;
+        if (text) {
+            annotations = [{
+                showarrow: false,
+                text: "<b>" + text + "</b>",
+                font: {
+                    family: 'Gravitas One',
+                    size: 30,
+                    color: 'blue'
+                },
+                xref: 'paper',
+                yref: '1',
+                x: 0.5,
+                y: 600
+            }]
+        }
+        return {
+            annotations: annotations,
+            xaxis: xaxis
+        }
+    }
+
+    var x = 0;
+    var interval = 0;
+    var audioView = document.getElementById("audioView");
+
+    function setAnimationInterval() {
+        if (interval != null) return;
+        if (x >= datas.length) {//播放结束后重新开始
+            x = 0;
+        }
+
+        return setInterval(function () {
+            if (x >= datas.times.length) {
+                clearInterval(interval);
+                interval = null;
+                return;
+            }
+            Plotly.update("plot", {}, getAnnotations(datas.notes[x]));
+
+            Plotly.relayout(graph, {
+                shapes: [{
+                    type: "line",
+                    line: {
+                        color: "red",
+                    },
+                    fillcolor: 'red',
+                    x0: x * 0.01,
+                    x1: x * 0.01,
+                    // ysizemode: 'pixel', //Default: "scaled"
+                    y0: 0,
+                    y1: 1,
+                    yref: 'paper'
+                }]
+            });
+
+            x += 10;
+        }, 100);
+    }
+
+    function onAudioUpdata() {
+        var audio = document.querySelector("audio");
+        audio.duration;//获取总播放时间
+        audio.currentTime;//获取播放进度
+        console.log(audio.currentTime);//控制台显示
+        clearInterval(interval)
+        interval = null;
+        x = parseInt(audio.currentTime * 100 + '');
+        interval = setAnimationInterval();
+    }
+
+    function startPlay(play) {
+        interval = setAnimationInterval();
+        if(play!=0){
+            audioView.play();
+        }
+
+    }
+
+    function stopPlay(play) {
+        clearInterval(interval);
+        interval = null;
+        if(play!=0){
+            audioView.pause();
+        }
+    }
+
+    // var graph = document.getElementById('plot')
+
+    // function stopAnimation () {
+    //   Plotly.animate(graph, frames, {
+    //       fromcurrent: true,
+    //       transition: {
+    //         duration: 0,
+    //       },
+    //       frame: {
+    //         duration: 0,
+    //         redraw: false
+    //       }
+    //   });
+    // }
+    //
+    // function startAnimation (mode) {
+    //   Plotly.animate(graph, frames, {
+    //       fromcurrent: true,
+    //       transition: {
+    //         duration: 0,
+    //       },
+    //       frame: {
+    //         duration: 100,
+    //         redraw: false
+    //       }
+    //   });
+    // }
+</script>
+</body>
