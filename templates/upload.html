@@ -168,7 +168,7 @@
 <div id="loading" style="display: none" class="loading style-2">
     <div class="loading-wheel"></div>
 </div>
-<div id="plot" style="width:100%;height:35rem;margin-top:0px"></div>
+<div id="plot" style="width:100%;margin-top:0px"></div>
 <div style="text-align: center;padding: 20px 0;">
     <input class="button" style="width:40rem;height:3rem; border: #3F83F1 solid 1px;" class="" type="file"
            accept="audio/*" name="audio" id="audio"/>
@@ -270,6 +270,7 @@
 
                 var layout = {
                     title: audio.name + ' 音高',
+                    height: 600,
                     dragmode: false,	 //移动端滚动图表
                     xaxis: xaxis,
                     yaxis: {
@@ -466,10 +467,11 @@
     }
 
     function onAudioUpdata() {
-        var audio = document.querySelector("audio");
-        audio.duration;//获取总播放时间
-        audio.currentTime;//获取播放进度
-        console.log(audio.currentTime);//控制台显示
+        audioView.play();
+        audioView.duration;//获取总播放时间
+        audioView.currentTime;//获取播放进度
+        //console.log(audio.currentTime);//控制台显示
+        audioView.play();
         clearInterval(interval)
         interval = null;
         x = parseInt(audio.currentTime * 100 + '');
