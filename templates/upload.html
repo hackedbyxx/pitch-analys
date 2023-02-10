@@ -161,6 +161,7 @@
     </style>
     <!--<script type="text/javascript" src="./static/js/jquery.3.6.3.min.js"></script>
     <script type="text/javascript" src="./static/js/plotly.2.18.0.min.js"></script>-->
+    <script type="text/javascript" src="./static/js/util.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/plotly.js@2.18.0/dist/plotly.min.js"></script>
 </head>
@@ -174,8 +175,8 @@
            accept="audio/*" name="audio" id="audio"/>
 </div>
 <div class="container">
-    <div class="center">
-        <audio id="audioView" style="width: 60rem" controls="controls" onSeeked="onAudioUpdata()" onPause="stopPlay(0)"
+    <div class="center" style="width: 90%">
+        <audio id="audioView" style="width: 100%" controls="controls" onSeeked="onAudioUpdata()" onPause="stopPlay(0)"
                onPlay="startPlay(0)"></audio>
     </div>
 </div>
@@ -197,6 +198,7 @@
     var graph = document.getElementById('plot');
     var loading = document.getElementById('loading');
     var xrange = 20;
+    var timeUnit = 0.01; //10毫秒
     var xaxis = {
         title: '时间（s)',
         // fixedrange: true,		//禁止x坐标缩放
@@ -246,6 +248,7 @@
                 // for(let i in data){
                 //     data[i]
                 // }
+                displayAlert('S', '生成成功', 1000);
                 loading.style.display = 'none';
                 var blob = new Blob([audio]);//bufs为二进制
                 // 设置路径使用jQuery或者直接生成dom都不生效
@@ -304,12 +307,6 @@
                         x: 0.5,
                         y: 600
                     }],
-                    margin: {		//设置图表的边距
-                        l: 50,
-                        r: 20,
-                        t: 40,
-                        b: 20
-                    },
                     /*updatemenus: [{
                       x: 0.5,
                       y: 0,
@@ -397,12 +394,16 @@
                 audioView.autoplay = true;
                 // Plotly.update("plot", {}, getAnnotations('B6'));
 
+            },
+            error: function (res, code) {
+                loading.style.display = 'none';
+                displayAlert('E', '生成失败', 2000);
             }
         });
     };
 
     function getAnnotations(text) {
-        var startX = x / 100;
+        var startX = x * timeUnit;
         startX = startX > xrange / 5 * 2 ? startX - xrange / 5 * 2 : 0;
         xaxis.range = [startX, startX + xrange]
         // console.log(xaxis.range)
@@ -453,8 +454,8 @@
                         color: "red",
                     },
                     fillcolor: 'red',
-                    x0: x * 0.01,
-                    x1: x * 0.01,
+                    x0: x * timeUnit,
+                    x1: x * timeUnit,
                     // ysizemode: 'pixel', //Default: "scaled"
                     y0: 0,
                     y1: 1,
