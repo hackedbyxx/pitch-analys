@@ -6,13 +6,14 @@
             background: #f1c40f;
         }*/
         
-        .container {
+        .row {
             width: 100%;
             /*position: relative;*/
             /*height: 20rem;*/
 
             display: flex;
             justify-content: center;
+            margin-top: 2px;
         }
         .center {
             /*width: 100rem;*/
@@ -159,11 +160,11 @@
             }
         }
     </style>
-    <!--<script type="text/javascript" src="./static/js/jquery.3.6.3.min.js"></script>
-    <script type="text/javascript" src="./static/js/plotly.2.18.0.min.js"></script>-->
+    <script type="text/javascript" src="./static/js/jquery.3.6.3.min.js"></script>
+    <script type="text/javascript" src="./static/js/plotly.2.18.0.min.js"></script>
     <script type="text/javascript" src="./static/js/util.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/plotly.js@2.18.0/dist/plotly.min.js"></script>
+    <!--<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/plotly.js@2.18.0/dist/plotly.min.js"></script>-->
 </head>
 <body>
 <div id="loading" style="display: none" class="loading style-2">
@@ -172,34 +173,38 @@
 <div id="plot" style="width:100%;margin-top:0px"></div>
 <div style="text-align: center;padding: 20px 0;">
     <input class="button" style="width:40rem;height:3rem; border: #3F83F1 solid 1px;" class="" type="file"
-           accept="audio/*" name="audio" id="audio"/>
+           accept="audio/*" name="audio" id="audio" />
 </div>
-<div class="container">
+<div class="row">
     <div class="center" style="width: 90%">
         <audio id="audioView" style="width: 100%" controls="controls" onSeeked="onAudioUpdata()" onPause="stopPlay(0)"
                onPlay="startPlay(0)"></audio>
     </div>
 </div>
-<div class="container">
+<div class="row">
     <div class="center">
-        <button class="button blue" onClick="update_plot()">生成频率图</button>
+        <button class="button blue" onClick="upload_file()">上传生成</button>
         <button class="button orange" onClick="startPlay()">播放</button>
         <button class="button red" onClick="stopPlay()">暂停</button>
     </div>
 </div>
+<div class="row center">
+    <input id="kge_url" style="width: 20rem"  class="button blue" placeholder="请输入全民K歌分享链接"/>
+    <button class="button blue" onClick="parse_kge()">解析全民K歌</button>
+</div>
 <script type="text/javascript">
-    var selectorOptions = {
+    let selectorOptions = {
         buttons: [{
             step: 'all',
         }],
     };
-    var datas;
-    var frames = [];
-    var graph = document.getElementById('plot');
-    var loading = document.getElementById('loading');
-    var xrange = 20;
-    var timeUnit = 0.01; //10毫秒
-    var xaxis = {
+    let datas;
+    let frames = [];
+    let graph = document.getElementById('plot');
+    let loading = document.getElementById('loading');
+    let xrange = 20;
+    let timeUnit = 0.01; //10毫秒
+    let xaxis = {
         title: '时间（s)',
         // fixedrange: true,		//禁止x坐标缩放
         titlefont: {
@@ -221,12 +226,20 @@
         rangeslider: {},
         range: [0, xrange]
     };
-    var update_plot = function () {
-        var audio = document.getElementById("audio").files[0];
-        var formData = new FormData();
-        formData.append("audio", audio);
-
-        var config = {
+    let upload_file = function () {
+        let audio = document.getElementById("audio").files[0];
+        update_plot('/pitch_track?smooth=0', {'audio':audio})
+    }
+    let parse_kge = function (){
+        let url = document.getElementById("kge_url").value
+        update_plot('/kge_pitch_track', {'url':url})
+    }
+    let update_plot = function (url, params) {
+        let formData = new FormData();
+        for(let key in params){
+            formData.append(key, params[key]);
+        }
+        let config = {
             toImageButtonOptions: {
                 format: 'svg', // one of png, svg, jpeg, webp
                 filename: audio.name + ' 音高图',
@@ -238,7 +251,7 @@
         };
         loading.style.display = '';
         $.getJSON({
-            url: "/pitch_track?smooth=0", method: "POST",
+            url: url, method: "POST",
             data: formData, processData: false, contentType: false,
             success: function (data) {
                 // console.log([...Array(data.length).keys()])
@@ -250,28 +263,32 @@
                 // }
                 displayAlert('S', '生成成功', 1000);
                 loading.style.display = 'none';
-                var blob = new Blob([audio]);//bufs为二进制
-                // 设置路径使用jQuery或者直接生成dom都不生效
-                if (window.URL) {
-                    audioView.src = window.URL.createObjectURL(blob);
+                if(params.audio){
+                    let blob = new Blob([params.audio]);//bufs为二进制
+                    // 设置路径使用jQuery或者直接生成dom都不生效
+                    if (window.URL) {
+                        audioView.src = window.URL.createObjectURL(blob);
+                    } else {
+                        audioView.src = blob;
+                    }
                 } else {
-                    audioView.src = blob;
+                    audioView.src = data.url;
                 }
 
                 datas = data;
-                var pitches = data.pitches.map(function (x) {
+                let pitches = data.pitches.map(function (x) {
                     return x == 0.0 ? undefined : x;
                 });
-                var n = data.times.length;
-                var index = 0;
-                for (var i = 0; i < n; i += 10) {
+                let n = data.times.length;
+                let index = 0;
+                for (let i = 0; i < n; i += 10) {
                     frames[index] = {data: [{x: [], y: []}]}
                     frames[index].data[0].x = data.times.slice(0, i + 1);
                     frames[index].data[0].y = pitches.slice(0, i + 1);
                     index++;
                 }
 
-                var layout = {
+                let layout = {
                     title: audio.name + ' 音高',
                     height: 600,
                     dragmode: false,	 //移动端滚动图表
@@ -403,11 +420,11 @@
     };
 
     function getAnnotations(text) {
-        var startX = x * timeUnit;
+        let startX = x * timeUnit;
         startX = startX > xrange / 5 * 2 ? startX - xrange / 5 * 2 : 0;
         xaxis.range = [startX, startX + xrange]
         // console.log(xaxis.range)
-        var annotations;
+        let annotations;
         if (text) {
             annotations = [{
                 showarrow: false,
@@ -429,9 +446,9 @@
         }
     }
 
-    var x = 0;
-    var interval = 0;
-    var audioView = document.getElementById("audioView");
+    let x = 0;
+    let interval = 0;
+    let audioView = document.getElementById("audioView");
 
     function setAnimationInterval() {
         if (interval != null) return;
