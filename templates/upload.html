@@ -177,7 +177,7 @@
 </div>
 <div class="row">
     <div class="center" style="width: 90%">
-        <audio id="audioView" style="width: 100%" controls="controls" onSeeked="onAudioUpdata()" onPause="stopPlay(0)"
+        <audio id="audioView" style="width: 100%" controls="controls" onSeeked="onAudioUpdate()" onPause="stopPlay(0)"
                onPlay="startPlay(0)"></audio>
     </div>
 </div>
@@ -272,7 +272,7 @@
                         audioView.src = blob;
                     }
                 } else {
-                    audioView.src = data.url;
+                    audioView.src = data.audio_url;
                 }
 
                 datas = data;
@@ -484,7 +484,7 @@
         }, 100);
     }
 
-    function onAudioUpdata() {
+    function onAudioUpdate() {
         x = parseInt(audioView.currentTime * 100 + '');
         //audioView.play();
         //audioView.duration;//获取总播放时间

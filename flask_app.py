@@ -120,7 +120,7 @@ def kge_pitch_track():
             print("%.2f MB" % (int(size) / 1024 / 1024))
             p = 0
             rp = requests.get(url, stream=True)
-            with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as tmp:
                 for i in rp.iter_content(chunk_size=1024):
                     p += len(i)
                     tmp.write(i)
@@ -128,9 +128,10 @@ def kge_pitch_track():
                     sys.stdout.write("\r[%s%s] %.2f%%" % ('█' * int(done), '' * int(50 - done), done + done))
                 sys.stdout.flush()
 
-                sound = parselmouth.Sound(tmp.name)
+                convert_audio_for_model(tmp.name, tmp.name + '.wav')
+                sound = parselmouth.Sound(tmp.name + '.wav')
                 pitch_result = get_pitch_result(sound)
-                pitch_result.audio_url = url
+                pitch_result['audio_url'] = url
                 return json.dumps(pitch_result)
         else:
             return json.dumps({"info": "暂无相关数据，请检查相关数据："}, ensure_ascii=False)
