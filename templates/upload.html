@@ -189,9 +189,10 @@
     </div>
 </div>
 <div class="row center">
-    <input id="kge_url" style="width: 20rem"  class="button blue" placeholder="请输入全民K歌分享链接"/>
+    <input id="kge_url" style="width: 20rem" class="button blue" placeholder="请输入全民K歌分享链接"/>
     <button class="button blue" onClick="parse_kge()">解析全民K歌</button>
 </div>
+<iframe id="kge" style="" sandbox="" src=""></iframe>
 <script type="text/javascript">
     let selectorOptions = {
         buttons: [{
@@ -228,21 +229,36 @@
     };
     let upload_file = function () {
         let audio = document.getElementById("audio").files[0];
-        update_plot('/pitch_track?smooth=0', {'audio':audio})
+        if(!audio) {
+            displayAlert('E', '请选择文件上传', 1000);
+            return;
+        }
+        update_plot('/pitch_track?smooth=0', {'audio':audio});
     }
+    let frame;
     let parse_kge = function (){
-        let url = document.getElementById("kge_url").value
-        update_plot('/kge_pitch_track', {'url':url})
+        let url = document.getElementById("kge_url").value;
+        frame = document.getElementById("kge");
+        frame.src = url;
+        frame.onload = function () {
+            console.log(frame.contentWindow.innerHTML)
+        }
+        //update_plot('/kge_pitch_track', {'url':url});
     }
     let update_plot = function (url, params) {
         let formData = new FormData();
         for(let key in params){
             formData.append(key, params[key]);
         }
+        let audio = params.audio;
+        let audioName;
+        if(audio){
+            audioName = audio.name;
+        }
         let config = {
             toImageButtonOptions: {
                 format: 'svg', // one of png, svg, jpeg, webp
-                filename: audio.name + ' 音高图',
+                filename: audioName + ' 音高图',
                 height: 600,
                 width: 1600,
                 scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
@@ -289,7 +305,7 @@
                 }
 
                 let layout = {
-                    title: audio.name + ' 音高',
+                    title: audioName + ' 音高',
                     height: 600,
                     dragmode: false,	 //移动端滚动图表
                     xaxis: xaxis,
@@ -447,7 +463,7 @@
     }
 
     let x = 0;
-    let interval = 0;
+    let interval;
     let audioView = document.getElementById("audioView");
 
     function setAnimationInterval() {

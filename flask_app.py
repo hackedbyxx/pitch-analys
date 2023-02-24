@@ -10,7 +10,7 @@ import math
 import parselmouth
 
 from pydub import AudioSegment
-from scipy.signal import savgol_filter
+#from scipy.signal import savgol_filter
 
 # 音高标记
 A4 = 440
@@ -55,8 +55,9 @@ def get_pitch_result(sound, smooth="0"):
 
     pitches = list(pitch_track)
     # 数据平滑处理
-    if smooth == "0":
-        pitches = list(savgol_filter(pitches, 99, 1, mode='nearest'))
+    if smooth == "1":
+        None
+        # pitches = list(savgol_filter(pitches, 99, 1, mode='nearest'))
     '''
     # 每0.5s计算平均音高 算法待优化
     pitches = []
@@ -108,6 +109,7 @@ def kge_pitch_track():
         if result.status_code == 200:
             res = result.text
             url = re.findall(pattern, res)[0]
+            print(url)
             cover = re.findall(cover_pattern, res)[0]
             info = {
                 "cover": cover,
@@ -120,7 +122,7 @@ def kge_pitch_track():
             print("%.2f MB" % (int(size) / 1024 / 1024))
             p = 0
             rp = requests.get(url, stream=True)
-            with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as tmp:
+            with tempfile.NamedTemporaryFile(suffix='.m4a', delete=False) as tmp:
                 for i in rp.iter_content(chunk_size=1024):
                     p += len(i)
                     tmp.write(i)
