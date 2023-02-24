@@ -192,7 +192,7 @@
     <input id="kge_url" style="width: 20rem" class="button blue" placeholder="请输入全民K歌分享链接"/>
     <button class="button blue" onClick="parse_kge()">解析全民K歌</button>
 </div>
-<iframe id="kge" style="" sandbox="" src=""></iframe>
+{#<iframe id="kge" style="" sandbox="" src=""></iframe>#}
 <script type="text/javascript">
     let selectorOptions = {
         buttons: [{
@@ -235,15 +235,14 @@
         }
         update_plot('/pitch_track?smooth=0', {'audio':audio});
     }
-    let frame;
     let parse_kge = function (){
         let url = document.getElementById("kge_url").value;
-        frame = document.getElementById("kge");
+        {#let frame = document.getElementById("kge");
         frame.src = url;
         frame.onload = function () {
             console.log(frame.contentWindow.innerHTML)
-        }
-        //update_plot('/kge_pitch_track', {'url':url});
+        }#}
+        update_plot('/kge_pitch_track', {'url':url});
     }
     let update_plot = function (url, params) {
         let formData = new FormData();
