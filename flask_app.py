@@ -130,8 +130,8 @@ def kge_pitch_track():
                     sys.stdout.write("\r[%s%s] %.2f%%" % ('█' * int(done), '' * int(50 - done), done + done))
                 sys.stdout.flush()
 
-                convert_audio_for_model(tmp.name, tmp.name + '.wav')
-                sound = parselmouth.Sound(tmp.name + '.wav')
+                # convert_audio_for_model(tmp.name, tmp.name + '.wav')
+                sound = parselmouth.Sound(tmp.name)
                 pitch_result = get_pitch_result(sound)
                 pitch_result['audio_url'] = url
                 return json.dumps(pitch_result)
