@@ -245,6 +245,7 @@
         update_plot('/kge_pitch_track', {'url':url});
     }
     let update_plot = function (url, params) {
+        clearInterval(interval)
         let formData = new FormData();
         for(let key in params){
             formData.append(key, params[key]);
