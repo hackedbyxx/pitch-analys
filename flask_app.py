@@ -8,8 +8,9 @@ from flask import Flask, request, jsonify, render_template
 import tempfile
 import math
 import parselmouth
+import pysndfile
 
-from pydub import AudioSegment
+# from pydub import AudioSegment
 #from scipy.signal import savgol_filter
 
 # 音高标记
@@ -37,20 +38,21 @@ def pitch_track(smooth=False):
     try:
         # Save the file that was sent, and read it into a parselmouth.Sound
         # windows要设置delete为False,否则无法正确生成临时文件
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(delete=True) as tmp:
             tmp.write(request.files['audio'].read())
-            tmp_name = convert_audio_for_model(tmp.name)
-            sound = parselmouth.Sound(tmp_name)
-
-        return jsonify(get_pitch_result(sound))
+            # tmp_name = convert_audio_for_model(tmp.name)
+            return jsonify(get_pitch_result(tmp.name))
     except Exception as e:
         traceback.print_exc()
         return str(e)
 
 
 # 获取音高数据
-def get_pitch_result(sound, smooth="0"):
+def get_pitch_result(sound_file_name, smooth="0"):
     # Calculate the pitch track with Parselmouth
+    data, rate, _ = pysndfile.sndio.read(sound_file_name)
+    sound = parselmouth.Sound(data, rate)
+    # sound = parselmouth.Sound(sound_file_name)
     pitch_track = sound.to_pitch().selected_array['frequency']
 
     pitches = list(pitch_track)
@@ -122,7 +124,7 @@ def kge_pitch_track():
             print("%.2f MB" % (int(size) / 1024 / 1024))
             p = 0
             rp = requests.get(url, stream=True)
-            with tempfile.NamedTemporaryFile(suffix='.m4a', delete=False) as tmp:
+            with tempfile.NamedTemporaryFile(suffix='.m4a', delete=True) as tmp:
                 for i in rp.iter_content(chunk_size=1024):
                     p += len(i)
                     tmp.write(i)
@@ -130,9 +132,9 @@ def kge_pitch_track():
                     sys.stdout.write("\r[%s%s] %.2f%%" % ('█' * int(done), '' * int(50 - done), done + done))
                 sys.stdout.flush()
 
-                convert_audio_for_model(tmp.name, tmp.name + '.wav')
-                sound = parselmouth.Sound(tmp.name + '.wav')
-                pitch_result = get_pitch_result(sound)
+                # convert_audio_for_model(tmp.name, tmp.name + '.wav')
+                # sound = parselmouth.Sound(tmp.name + '.wav')
+                pitch_result = get_pitch_result(tmp.name)
                 pitch_result['audio_url'] = url
                 return json.dumps(pitch_result)
         else:
@@ -213,8 +215,10 @@ EXPECTED_SAMPLE_RATE = 16000
 
 # Function that converts the user-created audio to the format that the model
 # expects: bitrate 16kHz and only one channel (mono).
+'''
 def convert_audio_for_model(user_file, output_file='converted_audio_file.wav'):
     audio = AudioSegment.from_file(user_file)
     audio = audio.set_frame_rate(EXPECTED_SAMPLE_RATE).set_channels(1)
     audio.export(output_file, format="wav")
     return output_file
+'''
