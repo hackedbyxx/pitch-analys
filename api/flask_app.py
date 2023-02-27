@@ -18,7 +18,7 @@ A4 = 440
 C0 = A4 * pow(2, -4.75)
 note_names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="../templates", static_folder="../static")
 
 session = requests.Session()
 headers = {
@@ -28,7 +28,7 @@ headers = {
 
 
 @app.route("/", methods=['GET'])  # 请求方式为get
-def login():
+def upload():
     return render_template('upload.html')
 
 
@@ -222,3 +222,6 @@ def convert_audio_for_model(user_file, output_file='converted_audio_file.wav'):
     audio.export(output_file, format="wav")
     return output_file
 '''
+
+if __name__ == '__main__':
+    app.run(debug=True)
