@@ -8,7 +8,7 @@ from flask import Flask, request, jsonify, render_template
 import tempfile
 import math
 import parselmouth
-import pysndfile
+import soundfile
 
 # from pydub import AudioSegment
 #from scipy.signal import savgol_filter
@@ -50,7 +50,7 @@ def pitch_track(smooth=False):
 # 获取音高数据
 def get_pitch_result(sound_file_name, smooth="0"):
     # Calculate the pitch track with Parselmouth
-    data, rate, _ = pysndfile.sndio.read(sound_file_name)
+    data, rate, _ = soundfile.read(sound_file_name)
     sound = parselmouth.Sound(data, rate)
     # sound = parselmouth.Sound(sound_file_name)
     pitch_track = sound.to_pitch().selected_array['frequency']
