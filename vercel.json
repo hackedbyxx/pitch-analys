@@ -1,11 +1,10 @@
 {
   "version": 2,
-  "builds": [
-      {
-          "src": "api/*.py",
-          "use": "@vercel/python"
-      }
-  ],
+  "functions": {
+    "api/flask_app.py": {
+      "excludeFiles": "*.js"
+    }
+  },
   "routes": [
       {
           "src": "(.*)",

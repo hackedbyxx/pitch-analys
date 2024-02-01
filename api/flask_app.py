@@ -45,7 +45,7 @@ def pitch_track(smooth=False):
             return jsonify(get_pitch_result(tmp.name))
     except Exception as e:
         traceback.print_exc()
-        return str(e)
+        return json.dumps({"info": "转换数据失败：" + str(e)}, ensure_ascii=False)
 
 
 # 获取音高数据
@@ -56,8 +56,9 @@ def get_pitch_result(sound_file_name, smooth="0"):
     except Exception as e:
         convert_audio_for_model(sound_file_name, sound_file_name)
         sound = parselmouth.Sound(sound_file_name)
-
-    pitch_track = sound.to_pitch().selected_array['frequency']
+    pitch = sound.to_pitch()
+    # pitch = pitch.smooth(0)
+    pitch_track = pitch.selected_array['frequency']
 
     pitches = list(pitch_track)
     # 数据平滑处理
@@ -112,11 +113,13 @@ def kge_pitch_track():
         result = session.get(url=url, headers=headers, timeout=10)
         pattern = re.compile('"playurl":"(.*?)",', re.S)
         cover_pattern = re.compile('"fb_cover":"(.*?)",', re.S)
+        name_pattern = re.compile('"song_name":"(.*?)",', re.S)
         if result.status_code == 200:
             res = result.text
             url = re.findall(pattern, res)[0]
             print(url)
             cover = re.findall(cover_pattern, res)[0]
+            song_name = re.findall(name_pattern, res)[0]
             info = {
                 "cover": cover,
                 "url": url,
@@ -128,7 +131,7 @@ def kge_pitch_track():
             print("%.2f MB" % (int(size) / 1024 / 1024))
             p = 0
             rp = requests.get(url, stream=True)
-            with tempfile.NamedTemporaryFile(suffix='.m4a', delete=True) as tmp:
+            with tempfile.NamedTemporaryFile(suffix='.m4a', delete=False) as tmp:
                 for i in rp.iter_content(chunk_size=1024):
                     p += len(i)
                     tmp.write(i)
@@ -137,6 +140,7 @@ def kge_pitch_track():
                 sys.stdout.flush()
 
                 pitch_result = get_pitch_result(tmp.name)
+                pitch_result['song_name'] = song_name
                 pitch_result['audio_url'] = url
                 return json.dumps(pitch_result)
         else:

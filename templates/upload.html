@@ -5,7 +5,6 @@
         /*body {
             background: #f1c40f;
         }*/
-        
         .row {
             width: 100%;
             /*position: relative;*/
@@ -175,8 +174,6 @@
 </div>
 <div id="plot" style="width:100%;margin-top:0px"></div>
 <div style="text-align: center;padding: 20px 0;">
-    <input class="button" style="width:40rem;height:3rem; border: #3F83F1 solid 1px;" class="" type="file"
-           accept="audio/*" name="audio" id="audio" />
 </div>
 <div class="row">
     <div class="center" style="width: 90%">
@@ -186,10 +183,14 @@
 </div>
 <div class="row">
     <div class="center">
-        <button class="button blue" onClick="upload_file()">上传生成</button>
         <button class="button orange" onClick="startPlay()">播放</button>
         <button class="button red" onClick="stopPlay()">暂停</button>
     </div>
+</div>
+<div class="row center">
+    <input class="button" style="width: 20rem" class="button blue" type="file"
+           accept="audio/*" name="audio" id="audio" />
+    <button class="button blue" onClick="upload_file()">上传生成</button>
 </div>
 <div class="row center">
     <input id="kge_url" style="width: 20rem" class="button blue" placeholder="请输入全民K歌分享链接"/>
@@ -280,7 +281,11 @@
                 // for(let i in data){
                 //     data[i]
                 // }
-                displayAlert('S', '生成成功', 1000);
+                if(data.info){
+                    displayAlert('E', data.info, 3000);
+                } else {
+                    displayAlert('S', '生成成功', 1000);
+                }
                 loading.style.display = 'none';
                 if(params.audio){
                     let blob = new Blob([params.audio]);//bufs为二进制
@@ -308,7 +313,7 @@
                 }
 
                 let layout = {
-                    title: audioName + ' 音高',
+                    title: data.song_name?data.song_name:audioName + ' 音高',
                     height: 600,
                     dragmode: false,	 //移动端滚动图表
                     xaxis: xaxis,
