@@ -1,0 +1,1 @@
+pyinstaller flask_app.spec
