@@ -1,1 +1,1 @@
-pyinstaller flask_app.spec
+pyinstaller run_app.spec
