@@ -28,7 +28,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='run_app',
+    name='pitch_server',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
