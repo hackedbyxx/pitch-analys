@@ -228,5 +228,11 @@ def convert_audio_for_model(user_file, output_file='converted_audio_file.wav'):
     audio.export(output_file, format="wav")
     return output_file
 
+def separate_vocal(file_input):
+    from spleeter.separator import Separator
+    separator = Separator('spleeter:2stems')
+    separator.separate_to_file(file_input, 'output', synchronous=False)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
