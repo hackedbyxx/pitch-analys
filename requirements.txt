@@ -1,6 +1,7 @@
-Flask==2.2.5
+Flask==2.0.3
 praat-parselmouth==0.4.3
 pydub==0.25.1
 requests==2.31.0
 pydub~=0.25.1
 spleeter==2.4.0
+Werkzeug==2.2.2
