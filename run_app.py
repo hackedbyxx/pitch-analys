@@ -1,6 +1,8 @@
 import json
+import os
 import re
 import sys
+import time
 import traceback
 
 import requests
@@ -34,15 +36,21 @@ def upload():
 
 
 @app.route('/pitch_track', methods=['POST'])
-def pitch_track(smooth=False):
+def pitch_track(smooth=False, vocal=0):
     smooth = request.args['smooth']
+    vocal = request.args['vocal']
     try:
         # Save the file that was sent, and read it into a parselmouth.Sound
         # windows要设置delete为False,否则无法正确生成临时文件
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
             tmp.write(request.files['audio'].read())
             # tmp_name = convert_audio_for_model(tmp.name)
-            return jsonify(get_pitch_result(tmp.name))
+            file_name = tmp.name
+            print(file_name)
+            if vocal == '1':
+                file_name = separate_vocal(file_name)
+            print(file_name)
+            return jsonify(get_pitch_result(file_name))
     except Exception as e:
         traceback.print_exc()
         return json.dumps({"info": "转换数据失败：" + str(e)}, ensure_ascii=False)
@@ -107,9 +115,11 @@ def get_pitch_result(sound_file_name, smooth="0"):
 
 
 @app.route('/kge_pitch_track', methods=['POST'])
-def kge_pitch_track():
+def kge_pitch_track(vocal=False):
+    vocal = request.args['vocal']
     try:
         url = request.form['url']
+
         result = session.get(url=url, headers=headers, timeout=10)
         pattern = re.compile('"playurl":"(.*?)",', re.S)
         cover_pattern = re.compile('"fb_cover":"(.*?)",', re.S)
@@ -138,8 +148,10 @@ def kge_pitch_track():
                     done = 50 * p / int(size)
                     sys.stdout.write("\r[%s%s] %.2f%%" % ('█' * int(done), '' * int(50 - done), done + done))
                 sys.stdout.flush()
-
-                pitch_result = get_pitch_result(tmp.name)
+                file_name = tmp.name
+                if vocal == '1':
+                    file_name = separate_vocal(file_name)
+                pitch_result = get_pitch_result(file_name)
                 pitch_result['song_name'] = song_name
                 pitch_result['audio_url'] = url
                 return json.dumps(pitch_result)
@@ -227,6 +239,20 @@ def convert_audio_for_model(user_file, output_file='converted_audio_file.wav'):
     audio = audio.set_frame_rate(EXPECTED_SAMPLE_RATE).set_channels(1)
     audio.export(output_file, format="wav")
     return output_file
+
+def separate_vocal(file_input):
+    from spleeter.separator import Separator
+    folder = 'output'
+    separator = Separator('spleeter:2stems')
+    separator.separate_to_file(file_input, folder, synchronous=False)
+    time.sleep(5)
+    dirStr, ext = os.path.splitext(file_input)
+    file_name = dirStr.split("\\")[-1]
+    path = folder + '/' + file_name + '/vocals.wav'
+    path = os.path.abspath(path)
+    while not os.path.exists(path):
+        None
+    return path
 
 if __name__ == '__main__':
     app.run(debug=True)

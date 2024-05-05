@@ -8,7 +8,7 @@ a = Analysis(
     ['run_app.py'],
     pathex=[],
     binaries=[],
-    datas=[('./templates','templates'),('./static','static')],
+    datas=[('./templates','templates'),('./static','static'),('./pretrained_models','pretrained_models')],
     hiddenimports=['numpy', 'pydub'],
     hookspath=[],
     hooksconfig={},
