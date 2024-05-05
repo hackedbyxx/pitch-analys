@@ -245,7 +245,6 @@ def separate_vocal(file_input):
     folder = 'output'
     separator = Separator('spleeter:2stems')
     separator.separate_to_file(file_input, folder, synchronous=False)
-    time.sleep(5)
     dirStr, ext = os.path.splitext(file_input)
     file_name = dirStr.split("\\")[-1]
     path = folder + '/' + file_name + '/vocals.wav'
